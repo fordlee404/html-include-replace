@@ -3,5 +3,6 @@
   "version": "0.0.0",
   "authors": "fordlee404@gmail.com",
   "description": "",
-  "license": "MIT"
+  "license": "MIT",
+  "main": "index.js"
 }
