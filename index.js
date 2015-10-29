@@ -18,7 +18,7 @@ var globalVarNames = Object.keys(globalVars);
 // Cached variable regular expressions
 var globalVarRegExps = {};
 
-function replace(contents, localVars) {
+var replace = function(contents, localVars) {
 
   localVars = localVars || {};
 
@@ -46,7 +46,7 @@ function replace(contents, localVars) {
 
 var includeRegExp = new RegExp(options.prefix + 'include\\(\\s*["\'](.*?)["\'](,\\s*({[\\s\\S]*?})){0,1}\\s*\\)' + options.suffix);
 
-function include(contents, workingDir) {
+var include = function(contents, workingDir) {
 
   var matches = includeRegExp.exec(contents);
 
@@ -58,28 +58,20 @@ function include(contents, workingDir) {
   }
 
   function getIncludeContents (includePath, localVars) {
-    var files = includePath,
+    var filePath = includePath,
       includeContents = '';
 
-    // If files is not an array of at least one element then bad
-    if (!files.length) {
-      console.warn('Include file(s) not found', includePath);
+    includeContents += fs.readFileSync(filePath, options.encoding);
+    includeContents += '\n';
+
+    // Make replacements
+    includeContents = replace(includeContents, localVars);
+
+    // Process includes
+    includeContents = include(includeContents, path.dirname(filePath));
+    if (options.processIncludeContents && typeof options.processIncludeContents === 'function') {
+      includeContents = options.processIncludeContents(includeContents, localVars, filePath);
     }
-
-    files.forEach(function (filePath, index) {
-      includeContents += fs.readFileSync(filePath, options.encoding);
-      // break a line for every file, except for the last one
-      includeContents += index !== files.length-1 ? '\n' : '';
-
-      // Make replacements
-      includeContents = replace(includeContents, localVars);
-
-      // Process includes
-      includeContents = include(includeContents, path.dirname(filePath));
-      if (options.processIncludeContents && typeof options.processIncludeContents === 'function') {
-        includeContents = options.processIncludeContents(includeContents, localVars, filePath);
-      }
-    });
 
     return includeContents;
   }
@@ -122,7 +114,7 @@ module.exports = function(src, config){
   }
 
   // update options
-  optionNames = Object.key(config);
+  var optionNames = Object.keys(config);
   optionNames.forEach(function(name){
     options[name] = config[name];
   });
