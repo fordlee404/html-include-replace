@@ -4,5 +4,8 @@
   "authors": "fordlee404@gmail.com",
   "description": "",
   "license": "MIT",
-  "main": "index.js"
+  "main": "index.js",
+  "devDependencies": {
+    "jasmine": "^2.3.2"
+  }
 }
